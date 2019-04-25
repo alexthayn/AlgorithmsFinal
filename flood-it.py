@@ -310,6 +310,7 @@ def setTile(color):
                 _gameover()
                 for_restart = True
             pygame.display.set_caption('Flood-it! GAME OVER!')
+    pygame.time.wait(500)
 
 
 def ycolorLocation(color):
