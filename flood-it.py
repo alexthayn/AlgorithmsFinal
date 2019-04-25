@@ -316,7 +316,7 @@ def setTile(color):
                 _gameover()
                 for_restart = True
             pygame.display.set_caption('Flood-it! GAME OVER!')
-    pygame.time.wait(1000)
+    pygame.time.wait(500)
 
 
 def ycolorLocation(color):
@@ -376,34 +376,26 @@ def createPathCostMatrix(start, end):
     i = start[0]
     while i <= end[0]:
         for j in range(2):
-            print("Location: ", i, j*32)
             if j == 0:
                 # check if left tile is same color
                 if(i-32 >= 0):
                     if tiles[str(i-32)+"-"+str(j)] == tiles[str(i)+"-"+str(j)]:
-                        print("Left matches")
                         costMatrix[j][i // 32] = 0
 
                     if tiles[str(i)+"-"+str(j+32)] == tiles[str(i)+"-"+str(j)] and tiles[str(i-32)+"-"+str(j+32)] == tiles[str(i)+"-"+str(j)]:
-                        print("Down and Down left matches")
                         costMatrix[j][i // 32] = 0
 
             if j == 1:
                 j = 32
                 if(i-32 >= 0):
                     if tiles[str(i-32)+"-"+str(j)] == tiles[str(i)+"-"+str(j)]:
-                        print("Left matches")
                         costMatrix[j//32][i // 32] = 0
                     up = costMatrix[0][i // 32]
                     if up == 0 and tiles[str(i-32)+"-"+str(j-32)] == tiles[str(i)+"-"+str(j)]:
-                        print("Up and up left matches")
                         costMatrix[j//32][i // 32] = 0
         i += 32
     return costMatrix
 
-###########################################################
-# END MY SOLUTION CODE
-###########################################################
 
 
 ###########################################################
@@ -518,4 +510,10 @@ def test_createCostMatrix():
     matrix = createPathCostMatrix([0,0],[416,32])
     print(matrix)
     expectedMatrix = [[1,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+    assert expectedMatrix == matrix
+
+    # change board tiles
+    tiles["96-32"] = _getcolor(1)
+    matrix = createPathCostMatrix([0,0],[416,32])
+    expectedMatrix = [[1,0,0,1,0,0,0,0,0,0,0,0,0,0],[1,0,0,1,0,0,0,0,0,0,0,0,0,0]]
     assert expectedMatrix == matrix
