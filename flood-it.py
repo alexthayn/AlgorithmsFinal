@@ -274,20 +274,14 @@ def executeShortestPath(location):
     if len(watchlist) == 0:
         source = "0-0"
     else:
-        source = str(watchlist[len(watchlist)-1][0]) + \
-            "-"+str(watchlist[len(watchlist)-1][1])
+        source = str(watchlist[len(watchlist)-1][0])+"-"+str(watchlist[len(watchlist)-1][1])
     target = str(location[0])+"-"+str(location[1])
     path = nx.shortest_path(graph, source=source,
                             target=target, method='dijkstra')
-    # print(path)
     prevNode = None
     for node in path:
         if prevNode != None and tiles[prevNode] != tiles[node]:
             print(node)
-            # e = pygame.event.Event(pygame.MOUSEBUTTONDOWN)
-            # x = 530
-            # pygame.mouse.set_pos(x, ycolorLocation(tiles[node]))
-            # pygame.event.post(e)
             setTile(tiles[node])
         prevNode = node
 
@@ -316,7 +310,7 @@ def setTile(color):
                 _gameover()
                 for_restart = True
             pygame.display.set_caption('Flood-it! GAME OVER!')
-    pygame.time.wait(500)
+    pygame.time.wait(5)
 
 
 def ycolorLocation(color):
