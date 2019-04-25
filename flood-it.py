@@ -267,6 +267,7 @@ def findMarkedTiles(board):
 
 
 def executeShortestPath(location):
+    # get the cost matrix
     costMatrix = createPathCostMatrix(watchlist[len(watchlist)-1]
                                       if len(watchlist) > 0 else [0, 0], location)
     graph = createGraph(costMatrix)
