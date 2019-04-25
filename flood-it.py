@@ -2,6 +2,7 @@
 # Game code from https://arvinbadiola.wordpress.com/2012/04/18/flood-it-game-in-python-2-7-with-pygame/
 import pygame
 import random
+import networkx as nx
 pygame.init()
 
 DEFAULT_SCREEN_SIZE = [608, 448]
@@ -261,14 +262,47 @@ def findMarkedTiles(board):
 def executeShortestPath(location):
     costMatrix = createPathCostMatrix(watchlist[len(watchlist)-1]
                                       if len(watchlist) > 0 else [0, 0], location)
-    # minCostPath =
+    graph = createGraph(costMatrix)
+    print(graph)
+
+
+def createGraph(costs):
+    g = nx.DiGraph()
+    # create all the nodes
+    for i in range(14):
+        for j in range(2):
+            g.add_node(str(i*32)+"-"+str(j*32))
+
+    # add weighted edges
+    j = 0
+    for i in range(14):
+        source = str(i*32)+"-"+str(j*32)
+        if(i < 13):
+            # add right edge
+            right = str((i+1)*32)+"-"+str(j*32)
+            g.add_edge(source, right, weight=costs[j][i+1])
+
+        # add down edge
+        down = str(i*32)+"-"+str((j+1)*32)
+        g.add_edge(source, down, weight=costs[j+1][i])
+
+    j = 1
+    for i in range(14):
+        source = str(i*32)+"-"+str(j*32)
+        if(i < 13):
+            # add right edge
+            right = str((i+1)*32)+"-"+str(j*32)
+            g.add_edge(source, right, weight=costs[j][i+1])
+
+        # add up edge
+        up = str(i*32)+"-"+str((j-1)*32)
+        g.add_edge(source, up, weigth=costs[j][i-1])
+    return g
 
 
 def createPathCostMatrix(start, end):
     costMatrix = [[1 for x in range(14)]
                   for y in range(2)]
-    print("Start: ", start)
-    print("End: ", end)
     i = start[0]
     while i <= end[0]:
         for j in range(2):
