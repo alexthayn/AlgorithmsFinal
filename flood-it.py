@@ -20,7 +20,7 @@ tiles = None  # list of coordinates of all tiles in the game
 is_done = False  # tells whether game is done
 update = False  # tells whether display must update
 for_restart = False  # tells whether player opted to restart
-movecount = None  # counts moves taken by the player
+movecount = 0  # counts moves taken by the player
 btncol = None  # list of control buttons
 
 # returns a color RGB values given a number from 1-6
@@ -220,7 +220,6 @@ def _init():
             tiles[str(X)+"-"+str(Y)] = color
             screen.blit(tile, [X, Y])
 
-    print(solution(board))
     # adds starting tile to watch list
     _fill([0, 0], tiles['0-0'])
 
@@ -231,6 +230,8 @@ def _init():
 
     # renders the controls
     _render_controls()
+
+    print(solution(board))
 
 
 def solution(board):
@@ -263,7 +264,67 @@ def executeShortestPath(location):
     costMatrix = createPathCostMatrix(watchlist[len(watchlist)-1]
                                       if len(watchlist) > 0 else [0, 0], location)
     graph = createGraph(costMatrix)
-    print(graph)
+    source = ""
+    if len(watchlist) == 0:
+        source = "0-0"
+    else:
+        source = str(watchlist[len(watchlist)-1][0]) + \
+            "-"+str(watchlist[len(watchlist)-1][1])
+    target = str(location[0])+"-"+str(location[1])
+    path = nx.shortest_path(graph, source=source,
+                            target=target, method='dijkstra')
+    # print(path)
+    prevNode = None
+    for node in path:
+        if prevNode != None and tiles[prevNode] != tiles[node]:
+            print(node)
+            # e = pygame.event.Event(pygame.MOUSEBUTTONDOWN)
+            # x = 530
+            # pygame.mouse.set_pos(x, ycolorLocation(tiles[node]))
+            # pygame.event.post(e)
+            setTile(tiles[node])
+        prevNode = node
+
+
+def setTile(color):
+    global movecount
+    global for_restart
+    if color != None and movecount < 25:
+        if not for_restart:
+            movecount += 1
+            tile = pygame.Surface(DEFAULT_TILE_SIZE)
+            tile.fill(color)
+            for i in range(len(watchlist)):
+                _fill(watchlist[i], color)
+            _colorwatchlist(tile)
+            pygame.display.set_caption('Flood-it! '+str(movecount)+'/25')
+
+        if len(watchlist) == 196:
+            if not for_restart:
+                _success()
+                for_restart = True
+            pygame.display.set_caption('Flood-it! Congratulations. You won!')
+
+        if movecount == 25 and len(watchlist) != 196:
+            if not for_restart:
+                _gameover()
+                for_restart = True
+            pygame.display.set_caption('Flood-it! GAME OVER!')
+
+
+def ycolorLocation(color):
+    if color == [255, 105, 180]:
+        return 21+15
+    if color == [138, 43, 226]:
+        return 95+15
+    if color == [255, 255, 0]:
+        return 169+15
+    if color == [255, 69, 0]:
+        return 243+15
+    if color == [110, 139, 61]:
+        return 317+15
+    if color == [0, 191, 255]:
+        return 391+15
 
 
 def createGraph(costs):
