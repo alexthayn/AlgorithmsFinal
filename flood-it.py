@@ -3,9 +3,11 @@
 import pygame
 import random
 import networkx as nx
+
 pygame.init()
 
-DEFAULT_SCREEN_SIZE = [608, 448]
+DEFAULT_SCREEN_SIZE = [448, 64]
+DEFAULT_BOARD_WIDTH = 448
 DEFAULT_BOARD_HEIGHT = 64
 DEFAULT_TILE_SIZE = [32, 32]
 DEFAULT_STEP_SIZE = 32
@@ -92,7 +94,7 @@ def _fill(coord, color):
         Y = coord[1]
         _addtowatchlist([X, Y], color)
 
-    if coord[0] + DEFAULT_STEP_SIZE < DEFAULT_SCREEN_SIZE[1]:
+    if coord[0] + DEFAULT_STEP_SIZE < DEFAULT_BOARD_WIDTH:
         X = coord[0] + DEFAULT_STEP_SIZE
         Y = coord[1]
         _addtowatchlist([X, Y], color)
