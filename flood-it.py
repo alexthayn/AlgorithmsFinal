@@ -1,18 +1,15 @@
 # Flood-It Solution algorithm for algorithms final project
 # Game code from https://arvinbadiola.wordpress.com/2012/04/18/flood-it-game-in-python-2-7-with-pygame/
+# pygame and networkx both need to be installed
 import pygame
 import random
 import networkx as nx
-
-pygame.init()
 
 DEFAULT_SCREEN_SIZE = [448, 64]
 DEFAULT_BOARD_WIDTH = 448
 DEFAULT_BOARD_HEIGHT = 64
 DEFAULT_TILE_SIZE = [32, 32]
 DEFAULT_STEP_SIZE = 32
-screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
-pygame.display.set_caption('Flood-it!')
 
 # declares all global variables
 board = None
@@ -236,6 +233,9 @@ def _init():
     print(solution(board))
 
 
+###########################################################
+# MY SOLUTION CODE
+###########################################################
 def solution(board):
     markedTiles = findMarkedTiles(board)
 
@@ -244,6 +244,8 @@ def solution(board):
         # check if this tile is in flooded region
         if convertedLocation not in watchlist:
             executeShortestPath(convertedLocation)
+
+# find the marked tiles on the board
 
 
 def findMarkedTiles(board):
@@ -260,6 +262,8 @@ def findMarkedTiles(board):
     for t in markedTiles.values():
         orderedTiles.append(t)
     return sorted(orderedTiles)
+
+# execute the flood fill algorithm on the shortest path
 
 
 def executeShortestPath(location):
@@ -312,7 +316,7 @@ def setTile(color):
                 _gameover()
                 for_restart = True
             pygame.display.set_caption('Flood-it! GAME OVER!')
-    pygame.time.wait(500)
+    pygame.time.wait(1000)
 
 
 def ycolorLocation(color):
@@ -328,6 +332,8 @@ def ycolorLocation(color):
         return 317+15
     if color == [0, 191, 255]:
         return 391+15
+
+# create  a graph given a matrix of costs
 
 
 def createGraph(costs):
@@ -370,83 +376,146 @@ def createPathCostMatrix(start, end):
     i = start[0]
     while i <= end[0]:
         for j in range(2):
+            print("Location: ", i, j*32)
             if j == 0:
                 # check if left tile is same color
-                if(i-32 > 0):
+                if(i-32 >= 0):
                     if tiles[str(i-32)+"-"+str(j)] == tiles[str(i)+"-"+str(j)]:
+                        print("Left matches")
                         costMatrix[j][i // 32] = 0
 
                     if tiles[str(i)+"-"+str(j+32)] == tiles[str(i)+"-"+str(j)] and tiles[str(i-32)+"-"+str(j+32)] == tiles[str(i)+"-"+str(j)]:
+                        print("Down and Down left matches")
                         costMatrix[j][i // 32] = 0
 
             if j == 1:
                 j = 32
-                if(i-32 > 0):
-
+                if(i-32 >= 0):
                     if tiles[str(i-32)+"-"+str(j)] == tiles[str(i)+"-"+str(j)]:
+                        print("Left matches")
                         costMatrix[j//32][i // 32] = 0
-                    up = costMatrix[0][i % 32]
+                    up = costMatrix[0][i // 32]
                     if up == 0 and tiles[str(i-32)+"-"+str(j-32)] == tiles[str(i)+"-"+str(j)]:
+                        print("Up and up left matches")
                         costMatrix[j//32][i // 32] = 0
         i += 32
-
-    print(costMatrix)
     return costMatrix
 
+###########################################################
+# END MY SOLUTION CODE
+###########################################################
 
-_init()
 
-while is_done == False:
-    # checks for changes in direction and validates it
-    for e in pygame.event.get():
-        color = None
+###########################################################
+# GAME LOOP
+###########################################################
+if __name__ == "__main__":
+    pygame.init()
 
-        if e.type == pygame.MOUSEBUTTONDOWN:
-            for i in range(len(btncol)):
-                if btncol[i]['bounds'].collidepoint(e.pos):
-                    color = _getcolor(i+1)
-        elif e.type == pygame.QUIT:
-            is_done = True
-        elif e.type == pygame.KEYUP:
-            update = True
-            if e.key == pygame.K_ESCAPE:
+    screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
+    pygame.display.set_caption('Flood-it!')
+
+    _init()
+
+    while is_done == False:
+        # checks for changes in direction and validates it
+        for e in pygame.event.get():
+            color = None
+
+            if e.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(len(btncol)):
+                    if btncol[i]['bounds'].collidepoint(e.pos):
+                        color = _getcolor(i+1)
+            elif e.type == pygame.QUIT:
                 is_done = True
-            elif e.key == pygame.K_r:
-                _init()
-            elif e.key == pygame.K_a:
-                color = _getcolor(1)
-            elif e.key == pygame.K_s:
-                color = _getcolor(2)
-            elif e.key == pygame.K_d:
-                color = _getcolor(3)
-            elif e.key == pygame.K_z:
-                color = _getcolor(4)
-            elif e.key == pygame.K_x:
-                color = _getcolor(5)
-            elif e.key == pygame.K_c:
-                color = _getcolor(6)
+            elif e.type == pygame.KEYUP:
+                update = True
+                if e.key == pygame.K_ESCAPE:
+                    is_done = True
+                elif e.key == pygame.K_r:
+                    _init()
+                elif e.key == pygame.K_a:
+                    color = _getcolor(1)
+                elif e.key == pygame.K_s:
+                    color = _getcolor(2)
+                elif e.key == pygame.K_d:
+                    color = _getcolor(3)
+                elif e.key == pygame.K_z:
+                    color = _getcolor(4)
+                elif e.key == pygame.K_x:
+                    color = _getcolor(5)
+                elif e.key == pygame.K_c:
+                    color = _getcolor(6)
 
-        if color != None and movecount < 25:
-            if not for_restart:
-                movecount += 1
-                tile = pygame.Surface(DEFAULT_TILE_SIZE)
-                tile.fill(color)
-                for i in range(len(watchlist)):
-                    _fill(watchlist[i], color)
-                _colorwatchlist(tile)
-                pygame.display.set_caption('Flood-it! '+str(movecount)+'/25')
+            if color != None and movecount < 25:
+                if not for_restart:
+                    movecount += 1
+                    tile = pygame.Surface(DEFAULT_TILE_SIZE)
+                    tile.fill(color)
+                    for i in range(len(watchlist)):
+                        _fill(watchlist[i], color)
+                    _colorwatchlist(tile)
+                    pygame.display.set_caption(
+                        'Flood-it! '+str(movecount)+'/25')
 
-        if len(watchlist) == 196:
-            if not for_restart:
-                _success()
-                for_restart = True
-            pygame.display.set_caption('Flood-it! Congratulations. You won!')
+            if len(watchlist) == 196:
+                if not for_restart:
+                    _success()
+                    for_restart = True
+                pygame.display.set_caption(
+                    'Flood-it! Congratulations. You won!')
 
-        if movecount == 25 and len(watchlist) != 196:
-            if not for_restart:
-                _gameover()
-                for_restart = True
-            pygame.display.set_caption('Flood-it! GAME OVER!')
-    if update == True:
-        # TODO: call update function
-        update = False
+            if movecount == 25 and len(watchlist) != 196:
+                if not for_restart:
+                    _gameover()
+                    for_restart = True
+                pygame.display.set_caption('Flood-it! GAME OVER!')
+        if update == True:
+            # TODO: call update function
+            update = False
+
+
+#############################################
+# TESTS
+#############################################
+def test_findMarkedTiles():
+    # create test board
+    board = dict()
+    for i in range(14):
+        for j in range(2):
+            board[i, j] = 2
+
+    markedTilesSet = findMarkedTiles(board)
+    assert len(markedTilesSet) == 1
+    assert markedTilesSet[0] == [13, 1]
+
+    # insert two more marked tiles
+    board[5, 0] = 0
+    board[5, 1] = 4
+    markedTilesSet = findMarkedTiles(board)
+    assert len(markedTilesSet) == 3
+    assert markedTilesSet[0] == [5, 0]
+    assert markedTilesSet[1] == [5, 1]
+    assert markedTilesSet[2] == [13, 1]
+
+
+def test_createGraph():
+    # create a cost matrix to base the graph from
+    pass
+
+
+def test_createCostMatrix():
+    # create a test board
+    global tiles
+    tiles = dict()
+    for i in range(14):
+        for j in range(2):
+            tiles[str(i*32)+"-"+str(j*32)] = _getcolor(2)
+    tiles["0-0"] = _getcolor(1)
+    tiles["32-0"] = _getcolor(1)
+    tiles["64-0"] = _getcolor(1)
+    print(tiles)
+    matrix = createPathCostMatrix([0,0],[416,32])
+    print(matrix)
+    expectedMatrix = [[1,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+    assert expectedMatrix == matrix
